@@ -99,7 +99,7 @@ class AttachMany extends Field
         return $this;
     }
 
-    public function setRelationShip($relationshipClass, $relationship = null)
+    public function setRelationship($relationshipClass, $relationship = null)
     {
         $this->withMeta([
             'relationshipClass' => $relationshipClass,

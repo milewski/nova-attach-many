@@ -123,4 +123,11 @@ class AttachMany extends Field
 
         return $this;
     }
+
+    public function relationName(string $relation)
+    {
+        $this->withMeta([ 'relationName' => $relation ]);
+
+        return $this;
+    }
 }

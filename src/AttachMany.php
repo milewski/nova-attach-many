@@ -3,11 +3,11 @@
 namespace NovaAttachMany;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Authorizable;
-use NovaAttachMany\Rules\ArrayRules;
-use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\ResourceRelationshipGuesser;
+use Laravel\Nova\Http\Requests\NovaRequest;
+use NovaAttachMany\Rules\ArrayRules;
 
 class AttachMany extends Field
 {
@@ -28,31 +28,6 @@ class AttachMany extends Field
     public $showOnDetail = false;
 
     public $component = 'nova-attach-many';
-
-    public function __construct($name, $attribute = null, $resource = null)
-    {
-        parent::__construct($name, $attribute);
-
-        $resource = $resource ?? ResourceRelationshipGuesser::guessResource($name);
-
-        $this->resource = $resource;
-
-        $this->resourceClass = $resource;
-        $this->resourceName = $resource::uriKey();
-        $this->manyToManyRelationship = $this->attribute;
-
-        $this->fillUsing(function($request, $model, $attribute, $requestAttribute) use($resource) {
-            if(is_subclass_of($model, 'Illuminate\Database\Eloquent\Model')) {
-                $model::saved(function($model) use($attribute, $request) {
-                    $model->$attribute()->sync(
-                        json_decode($request->$attribute, true)
-                    );
-                });
-
-                unset($request->$attribute);
-            }
-        });
-    }
 
     public function rules($rules)
     {
@@ -124,9 +99,11 @@ class AttachMany extends Field
         return $this;
     }
 
-    public function relationName(string $relation)
+    public function setRelationShip($relationshipClass, $relation)
     {
-        $this->withMeta([ 'relationName' => $relation ]);
+        $this->withMeta(
+            compact('relationshipClass', 'relation')
+        );
 
         return $this;
     }

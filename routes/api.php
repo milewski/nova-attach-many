@@ -1,4 +1,4 @@
 <?php
 
-Route::get('/{resource}/attachable/{relationship}', '\NovaAttachMany\Http\Controllers\AttachController@create');
-Route::get('/{resource}/{resourceId}/attachable/{relationship}', '\NovaAttachMany\Http\Controllers\AttachController@edit');
+Route::get('/{resource}/attachable', '\NovaAttachMany\Http\Controllers\AttachController@create');
+Route::get('/{resource}/{resourceId}/attachable', '\NovaAttachMany\Http\Controllers\AttachController@edit');

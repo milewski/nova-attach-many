@@ -2,42 +2,45 @@
 
 namespace NovaAttachMany\Http\Controllers;
 
+use App\Models\Block;
 use Laravel\Nova\Resource;
 use Illuminate\Routing\Controller;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class AttachController extends Controller
 {
-    public function create(NovaRequest $request, $parent, $relationship)
+    public function create(NovaRequest $request, $parent)
     {
+        $payload = $this->parsePayload($request);
+
         return [
-            'available' => $this->getAvailableResources($request, $relationship),
+            'available' => $this->getAvailableResources($request, $payload->relationshipClass),
         ];
     }
 
-    public function edit(NovaRequest $request, $parent, $parentId, $relationship)
+    public function edit(NovaRequest $request, $parent, $parentId)
     {
+        $payload = $this->parsePayload($request);
+
+        $relationship = $payload->relationship;
+        $relationshipClass = $payload->relationshipClass;
+        $resourceId = $payload->resourceId;
+
+        $modelInstance = $relationshipClass::findOrFail($resourceId);
+
         return [
-            'selected' => $request->findResourceOrFail()->model()->{$relationship}->pluck('id'),
-            'available' => $this->getAvailableResources($request, $relationship),
+            'selected' => $modelInstance->{$relationship}->pluck('id'),
+            'available' => $this->getAvailableResources($request, $relationshipClass),
         ];
     }
 
-    public function getAvailableResources($request, $relationship)
+    public function getAvailableResources($request, $relationshipClass)
     {
-        $resourceClass = $request->newResource();
+        $query = $relationshipClass::newModel();
 
-        $field = $resourceClass
-            ->availableFields($request)
-            ->where('component', 'nova-attach-many')
-            ->where('attribute', $relationship)
-            ->first();
-
-        $query = $field->resourceClass::newModel();
-
-        return $field->resourceClass::relatableQuery($request, $query)->get()
-            ->mapInto($field->resourceClass)
-            ->filter(function ($resource) use ($request, $field) {
+        return $relationshipClass::relatableQuery($request, $query)->get()
+            ->mapInto($relationshipClass)
+            ->filter(function ($resource) use ($request) {
                 return $request->newResource()->authorizedToAttach($request, $resource->resource);
             })->map(function($resource) {
                 return [
@@ -45,5 +48,9 @@ class AttachController extends Controller
                     'value' => $resource->getKey(),
                 ];
             })->sortBy('display')->values();
+    }
+
+    private function parsePayload($request) {
+        return json_decode(base64_decode($request->query('payload')));
     }
 }

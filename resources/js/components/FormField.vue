@@ -51,6 +51,7 @@
 
 <script>
 import { FormField, HandlesValidationErrors } from 'laravel-nova'
+import { Base64 } from 'js-base64'
 
 export default {
     mixins: [FormField, HandlesValidationErrors],
@@ -71,9 +72,14 @@ export default {
         setInitialValue() {
 
             let baseUrl = '/nova-vendor/nova-attach-many/';
+            let payload = Base64.encodeURI(JSON.stringify({
+                resourceId: this.$parent.$el.id,
+                relationshipClass: this.field.relationshipClass,
+                relationship: this.field.relationship
+            }));
 
             if(this.resourceId) {
-                Nova.request(baseUrl + this.resourceName + '/' + this.resourceId + '/attachable/' + this.fieldAttribute)
+                Nova.request(baseUrl + this.resourceName + '/' + this.resourceId + '/attachable/?payload=' + payload)
                     .then((data) => {
                         this.selected = data.data.selected || [];
                         this.available = data.data.available || [];
@@ -81,7 +87,7 @@ export default {
                     });
             }
             else {
-                Nova.request(baseUrl + this.resourceName + '/attachable/' + this.fieldAttribute)
+                Nova.request(baseUrl + this.resourceName + '/attachable/?payload=' + payload)
                     .then((data) => {
                         this.available = data.data.available || [];
                         this.loading = false;
@@ -91,7 +97,7 @@ export default {
         },
 
         fill(formData) {
-            formData.append(this.fieldAttribute, this.value || [])
+            formData.append(this.field.attribute, this.value || [])
         },
 
         toggle(event, id){
@@ -177,9 +183,6 @@ export default {
         }
     },
     computed: {
-        fieldAttribute: function() {
-            return this.field.relationName || this.field.attribute
-        },
         resources: function() {
             if(this.preview) {
                 return this.available.filter((resource) => {
@@ -196,10 +199,10 @@ export default {
             });
         },
         hasErrors: function() {
-            return this.errors.errors.hasOwnProperty(this.fieldAttribute);
+            return this.errors.errors.hasOwnProperty(this.field.attribute);
         },
         firstError: function() {
-            return this.errors.errors[this.fieldAttribute][0]
+            return this.errors.errors[this.field.attribute][0]
         }
     },
     watch: {

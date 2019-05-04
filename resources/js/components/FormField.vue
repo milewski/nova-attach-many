@@ -75,6 +75,7 @@ export default {
             let payload = Base64.encodeURI(JSON.stringify({
                 resourceId: this.$parent.$el.id,
                 relationshipClass: this.field.relationshipClass,
+                relatedResourceClass: this.field.relatedResourceClass,
                 relationship: this.field.relationship
             }));
 

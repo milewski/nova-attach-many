@@ -14,7 +14,7 @@ class AttachController extends Controller
         $payload = $this->parsePayload($request);
 
         return [
-            'available' => $this->getAvailableResources($request, $payload->relationshipClass),
+            'available' => $this->getAvailableResources($request, $payload->relatedResourceClass),
         ];
     }
 
@@ -24,13 +24,14 @@ class AttachController extends Controller
 
         $relationship = $payload->relationship;
         $relationshipClass = $payload->relationshipClass;
+        $relatedResourceClass = $payload->relatedResourceClass;
         $resourceId = $payload->resourceId;
 
         $modelInstance = $relationshipClass::findOrFail($resourceId);
 
         return [
             'selected' => $modelInstance->{$relationship}->pluck('id'),
-            'available' => $this->getAvailableResources($request, $relationshipClass),
+            'available' => $this->getAvailableResources($request, $relatedResourceClass),
         ];
     }
 

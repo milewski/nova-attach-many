@@ -29,6 +29,15 @@ class AttachMany extends Field
 
     public $component = 'nova-attach-many';
 
+    public $relatedResourceClass;
+
+    public function __construct($name, $attribute, $resource)
+    {
+        parent::__construct($name, $attribute);
+
+        $this->relatedResourceClass = $resource;
+    }
+
     public function rules($rules)
     {
         $rules = ($rules instanceof Rule || is_string($rules)) ? func_get_args() : $rules;
@@ -45,7 +54,8 @@ class AttachMany extends Field
             'fullWidth' => $this->fullWidth,
             'showCounts' => $this->showCounts,
             'showPreview' => $this->showPreview,
-            'showToolbar' => $this->showToolbar
+            'showToolbar' => $this->showToolbar,
+            'relatedResourceClass' => $this->relatedResourceClass
         ]);
     }
 

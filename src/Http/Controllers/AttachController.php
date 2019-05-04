@@ -27,10 +27,10 @@ class AttachController extends Controller
         $relatedResourceClass = $payload->relatedResourceClass;
         $resourceId = $payload->resourceId;
 
-        $modelInstance = $relationshipClass::findOrFail($resourceId);
+        $modelInstance = $relationshipClass::find($resourceId);
 
         return [
-            'selected' => $modelInstance->{$relationship}->pluck('id'),
+            'selected' => $modelInstance ? $modelInstance->{$relationship}->pluck('id') : [],
             'available' => $this->getAvailableResources($request, $relatedResourceClass),
         ];
     }
